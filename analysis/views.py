@@ -33,9 +33,7 @@ class TopFive(APIView):
 	"""
 	def get(self,request):
 		stock_name = request.query_params.get("stock_name")
-		print stock_name,">>>>>>"
 		volumes = StockPrices.objects.filter(stock_id__name=stock_name).order_by('-stock_volume')[:5]
-		print volumes
 		if volumes:
 			data = StockPricesSerializer(volumes,many=True).data
 			return Response({
@@ -70,7 +68,6 @@ class CompanyShare(APIView):
 	def get(self,request):
 		stock_name = request.query_params.get('stock_name')
 		stock_data = StockPrices.objects.filter(stock_id__name=stock_name)
-		print stock_name
 		data = []
 		for i in stock_data:
 			stock = {}
