@@ -69,17 +69,28 @@ class CompanyShare(APIView):
 		stock_name = request.query_params.get('stock_name')
 		stock_data = StockPrices.objects.filter(stock_id__name=stock_name)
 		data = []
-		for i in stock_data:
+		latest = stock_data[0]
+		previous = ""
+		for i in stock_data[1:]:
+			previous = i
 			stock = {}
-			diffrence = i.stock_close - i.stock_open
-			percentage = float(diffrence / i.stock_open * 100)
+			diffrence = latest.stock_close - previous.stock_close
+			percentage = float(diffrence / previous.stock_close * 100)
 			stock_dif = format(percentage,'.2f')
-			stock['open'] = i.stock_open
-			stock['close'] = i.stock_close
+			stock['open'] = latest.stock_open
+			stock['close'] = latest.stock_close
 			stock['change'] = stock_dif
-			stock['date'] = i.stock_date
+			stock['date'] = latest.stock_date
 			data.append(stock)
+			latest = previous
+		data.append({
+			"open":previous.stock_open,
+			"close":previous.stock_close,
+			"date": previous.stock_date,
+			"change":"",
+		})
+
 		return Response({
 			'status':'OK',
-			'data':data
+			'data':data[::-1]
 		},status=status.HTTP_200_OK)	
